@@ -18,6 +18,7 @@ Build a rules-based forex strategy that trades rarely, with layered confirmation
 - Higher-timeframe trend filter: `H1` by default.
 - Entry timeframe: `M15` by default.
 - Countertrend trading is disabled by default.
+- Higher timeframe defines the operating regime; lower timeframe is used only for execution.
 
 ### Trend direction
 
@@ -50,6 +51,12 @@ The live signal model should distinguish:
 - **trend continuation**: EMA alignment, slope, advancing structure, pullback, and confirmation;
 - **breakout continuation**: a genuine level break with follow-through;
 - **range / no-trade regime**: compressed structure or insufficient room to the next obstacle.
+
+### Pair-specific timing
+
+- Trading windows should eventually be configured by symbol rather than assumed universal.
+- Each pair should be validated for its own active hours.
+- Weak hours discovered in backtesting should be treated as validation targets before being allowed live.
 
 ### Long entry logic
 
@@ -134,3 +141,4 @@ This strategy is intentionally unglamorous:
 - It creates traceable reasons for every decision.
 - It is naturally selective, which is appropriate for small capital and strict risk control.
 - It respects that currencies are driven by both charts and macro forces.
+

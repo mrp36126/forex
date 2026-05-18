@@ -37,6 +37,7 @@ Low leverage is treated as a positive design choice. Large notional exposure is 
 - One open position per symbol.
 - Maximum total open risk across all positions.
 - Avoid loading several highly correlated USD exposures that are effectively the same macro bet.
+- In future multi-pair trading, use a correlation-aware portfolio cap so several "different" trades do not behave like one oversized theme.
 - Block trades when:
   - spread exceeds threshold,
   - slippage is unacceptable,

@@ -9,6 +9,7 @@
 | Supabase | Store settings, logs, sentiment snapshots, risk events, backtests | No |
 | Vercel dashboard | Read-only monitoring and reporting | No |
 | Research layer | Maintain pair notes, macro context, and post-trade review taxonomy | No |
+| Correlation monitor | Estimate portfolio overlap across open FX exposures | No |
 
 ## Data flow
 
@@ -27,7 +28,10 @@ Future monitoring should support:
 - macro context snapshots by currency;
 - cross-market context such as broad USD tone and rate expectations;
 - post-trade classification;
-- separation between "valid loss" and "bad trade."
+- separation between "valid loss" and "bad trade.";
+- pair-specific active session profiles;
+- cross-pair correlation snapshots;
+- regime-specific performance by symbol.
 
 ## Sentiment service contract
 

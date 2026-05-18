@@ -36,6 +36,8 @@
 - Default parameters vs nearby parameter values.
 - Per-pair performance, rather than only pooled portfolio results.
 - Performance by macro regime and major event windows.
+- Performance by trading hour and by market regime.
+- Correlated exposure impact when multiple pairs are tested together.
 
 ## Reject the strategy if
 
@@ -62,3 +64,4 @@
 - Did performance depend on a period of unusually favorable macro conditions?
 - Were rollover, spreads, and event risk realistically represented?
 - Did the strategy stay specialized and understandable, or become a parameter maze?
+
