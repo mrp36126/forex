@@ -70,4 +70,5 @@ More detailed instructions are included in the docs files.
 - `docs/architecture.md` â€” component boundaries and sentiment-service design
 - `docs/strategy-tester.md` â€” first Strategy Tester run and what to inspect
 - docs/book-notes-currency-trading-for-dummies.md - book-informed project principles
+- docs/book-review-currency-trading-for-dummies.md - applied lessons from the full supplied book
 

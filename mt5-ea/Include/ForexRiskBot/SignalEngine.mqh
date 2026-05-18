@@ -105,6 +105,8 @@ public:
       bool bullishTrend = fastTrend > slowTrend && close1 > slowTrend;
       bool bearishTrend = fastTrend < slowTrend && close1 < slowTrend;
       bool nearFastEma = MathAbs(close1 - fastEntry) <= PullbackTolerancePoints * _Point;
+      bool bullishConfirmation = rates[0].close > fastEntry && rates[0].close > rates[1].high;
+      bool bearishConfirmation = rates[0].close < fastEntry && rates[0].close < rates[1].low;
 
       if(UseMACDConfirmation)
       {
@@ -117,7 +119,8 @@ public:
 
       if(AllowBuy && bullishTrend && fastEntry > slowEntry && nearFastEma &&
          rsi > RSIOversold && rsi < RSIOverbought &&
-         (!UseMACDConfirmation || macdMain > macdSignal))
+         (!UseMACDConfirmation || macdMain > macdSignal) &&
+         (!RequireConfirmationCandle || bullishConfirmation))
       {
          reason = "bullish trend pullback confirmed";
          return DIR_BUY;
@@ -125,7 +128,8 @@ public:
 
       if(AllowSell && bearishTrend && fastEntry < slowEntry && nearFastEma &&
          rsi < RSIOverbought && rsi > RSIOversold &&
-         (!UseMACDConfirmation || macdMain < macdSignal))
+         (!UseMACDConfirmation || macdMain < macdSignal) &&
+         (!RequireConfirmationCandle || bearishConfirmation))
       {
          reason = "bearish trend pullback confirmed";
          return DIR_SELL;

@@ -36,6 +36,8 @@ input double MaxTotalOpenRiskPercent = 2.0;
 input double DailyProfitTargetPercent = 0.0;
 input int    StructureLookbackBars = 20;
 input int    PullbackTolerancePoints = 50;
+input bool   RequireConfirmationCandle = true;
+input int    MinATRPoints = 40;
 
 enum TradeDirection
 {

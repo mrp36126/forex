@@ -146,6 +146,11 @@ void OnTick()
       RecordNoTrade("atr unavailable");
       return;
    }
+   if((atr / _Point) < MinATRPoints)
+   {
+      RecordNoTrade("atr below minimum volatility threshold");
+      return;
+   }
 
    double sl = 0.0;
    double tp = 0.0;
@@ -177,6 +182,14 @@ void OnTick()
    riskManager.RegisterTradeOpened();
    if(direction == DIR_BUY) buyCount++;
    if(direction == DIR_SELL) sellCount++;
+   logger.Info(StringFormat("trade plan symbol=%s direction=%s lots=%.2f entry=%.5f sl=%.5f tp=%.5f rr=%.2f",
+                            _Symbol,
+                            direction == DIR_BUY ? "BUY" : "SELL",
+                            lots,
+                            entry,
+                            sl,
+                            tp,
+                            RewardRiskRatio));
    logger.Decision(_Symbol, direction == DIR_BUY ? "BUY" : "SELL", "entry accepted: " + reason);
 }
 
