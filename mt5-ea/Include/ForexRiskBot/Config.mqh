@@ -38,6 +38,11 @@ input int    StructureLookbackBars = 20;
 input int    PullbackTolerancePoints = 50;
 input bool   RequireConfirmationCandle = true;
 input int    MinATRPoints = 40;
+input int    TrendSlopeLookbackBars = 5;
+input int    MinimumTrendSlopePoints = 20;
+input int    BreakoutBufferPoints = 10;
+input int    MinStructureRangePoints = 120;
+input int    MinimumObstacleDistancePoints = 80;
 
 enum TradeDirection
 {

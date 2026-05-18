@@ -45,6 +45,12 @@ The first implementation uses recent swing highs/lows over a configurable lookba
 
 This is deliberately simple and testable. More advanced swing logic can be added later only if it improves out-of-sample robustness.
 
+The live signal model should distinguish:
+
+- **trend continuation**: EMA alignment, slope, advancing structure, pullback, and confirmation;
+- **breakout continuation**: a genuine level break with follow-through;
+- **range / no-trade regime**: compressed structure or insufficient room to the next obstacle.
+
 ### Long entry logic
 
 All required:
@@ -56,6 +62,7 @@ All required:
 5. RSI is above the oversold threshold but below overbought territory.
 6. Spread, session, risk, news, and sentiment filters all approve.
 7. Macro context is not marked as high uncertainty or strongly opposed to the technical direction.
+8. Structure is progressing upward and there is enough room before the next resistance obstacle.
 
 Optional confirmations:
 
@@ -73,6 +80,7 @@ Mirror image of the long setup:
 5. RSI is below the overbought threshold but above oversold territory.
 6. All operational filters approve.
 7. Macro context is not marked as high uncertainty or strongly opposed to the technical direction.
+8. Structure is progressing downward and there is enough room before the next support obstacle.
 
 ### News filter
 

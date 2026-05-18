@@ -74,9 +74,11 @@ public:
 
    TradeDirection Evaluate(const string symbol, string &reason)
    {
-      double fastTrend, slowTrend, fastEntry, slowEntry, rsi, macdMain = 0.0, macdSignal = 0.0;
+      double fastTrend, slowTrend, fastTrendPast, slowTrendPast, fastEntry, slowEntry, rsi, macdMain = 0.0, macdSignal = 0.0;
       if(!ReadOne(m_fastTrendHandle, 0, 1, fastTrend) ||
          !ReadOne(m_slowTrendHandle, 0, 1, slowTrend) ||
+         !ReadOne(m_fastTrendHandle, 0, 1 + TrendSlopeLookbackBars, fastTrendPast) ||
+         !ReadOne(m_slowTrendHandle, 0, 1 + TrendSlopeLookbackBars, slowTrendPast) ||
          !ReadOne(m_fastEntryHandle, 0, 1, fastEntry) ||
          !ReadOne(m_slowEntryHandle, 0, 1, slowEntry) ||
          !ReadOne(m_rsiHandle, 0, 1, rsi))
@@ -93,20 +95,45 @@ public:
          return DIR_NONE;
       }
 
+      int midpoint = MathMax(2, StructureLookbackBars / 2);
       double recentHigh = rates[1].high;
       double recentLow = rates[1].low;
+      double previousHigh = rates[midpoint + 1].high;
+      double previousLow = rates[midpoint + 1].low;
       for(int i = 1; i <= StructureLookbackBars; i++)
       {
-         recentHigh = MathMax(recentHigh, rates[i].high);
-         recentLow = MathMin(recentLow, rates[i].low);
+         if(i <= midpoint)
+         {
+            recentHigh = MathMax(recentHigh, rates[i].high);
+            recentLow = MathMin(recentLow, rates[i].low);
+         }
+         else
+         {
+            previousHigh = MathMax(previousHigh, rates[i].high);
+            previousLow = MathMin(previousLow, rates[i].low);
+         }
       }
 
       double close1 = rates[0].close;
-      bool bullishTrend = fastTrend > slowTrend && close1 > slowTrend;
-      bool bearishTrend = fastTrend < slowTrend && close1 < slowTrend;
+      double structureRangePoints = (recentHigh - recentLow) / _Point;
+      double fastSlopePoints = (fastTrend - fastTrendPast) / _Point;
+      double slowSlopePoints = (slowTrend - slowTrendPast) / _Point;
+      bool bullishTrend = fastTrend > slowTrend && close1 > slowTrend &&
+                          fastSlopePoints >= MinimumTrendSlopePoints &&
+                          slowSlopePoints >= 0.0;
+      bool bearishTrend = fastTrend < slowTrend && close1 < slowTrend &&
+                          fastSlopePoints <= -MinimumTrendSlopePoints &&
+                          slowSlopePoints <= 0.0;
       bool nearFastEma = MathAbs(close1 - fastEntry) <= PullbackTolerancePoints * _Point;
       bool bullishConfirmation = rates[0].close > fastEntry && rates[0].close > rates[1].high;
       bool bearishConfirmation = rates[0].close < fastEntry && rates[0].close < rates[1].low;
+      bool bullishStructure = recentHigh > previousHigh && recentLow > previousLow;
+      bool bearishStructure = recentHigh < previousHigh && recentLow < previousLow;
+      bool bullishBreakout = rates[0].close > previousHigh + BreakoutBufferPoints * _Point;
+      bool bearishBreakout = rates[0].close < previousLow - BreakoutBufferPoints * _Point;
+      double roomToResistancePoints = MathMax(0.0, (recentHigh - close1) / _Point);
+      double roomToSupportPoints = MathMax(0.0, (close1 - recentLow) / _Point);
+      bool inRange = structureRangePoints < MinStructureRangePoints;
 
       if(UseMACDConfirmation)
       {
@@ -117,25 +144,49 @@ public:
          }
       }
 
+      if(inRange)
+      {
+         reason = "range regime detected";
+         return DIR_NONE;
+      }
+
       if(AllowBuy && bullishTrend && fastEntry > slowEntry && nearFastEma &&
          rsi > RSIOversold && rsi < RSIOverbought &&
          (!UseMACDConfirmation || macdMain > macdSignal) &&
-         (!RequireConfirmationCandle || bullishConfirmation))
+         (!RequireConfirmationCandle || bullishConfirmation) &&
+         bullishStructure &&
+         roomToResistancePoints >= MinimumObstacleDistancePoints)
       {
-         reason = "bullish trend pullback confirmed";
+         reason = "bullish trend continuation confirmed";
          return DIR_BUY;
       }
 
       if(AllowSell && bearishTrend && fastEntry < slowEntry && nearFastEma &&
          rsi < RSIOverbought && rsi > RSIOversold &&
          (!UseMACDConfirmation || macdMain < macdSignal) &&
-         (!RequireConfirmationCandle || bearishConfirmation))
+         (!RequireConfirmationCandle || bearishConfirmation) &&
+         bearishStructure &&
+         roomToSupportPoints >= MinimumObstacleDistancePoints)
       {
-         reason = "bearish trend pullback confirmed";
+         reason = "bearish trend continuation confirmed";
          return DIR_SELL;
       }
 
-      reason = "trend, pullback, or momentum confirmation missing";
+      if(AllowBuy && bullishTrend && bullishBreakout && bullishStructure &&
+         rsi > 50.0 && roomToResistancePoints >= MinimumObstacleDistancePoints)
+      {
+         reason = "bullish breakout continuation confirmed";
+         return DIR_BUY;
+      }
+
+      if(AllowSell && bearishTrend && bearishBreakout && bearishStructure &&
+         rsi < 50.0 && roomToSupportPoints >= MinimumObstacleDistancePoints)
+      {
+         reason = "bearish breakout continuation confirmed";
+         return DIR_SELL;
+      }
+
+      reason = "regime, structure, obstacle, or confirmation filter blocked trade";
       return DIR_NONE;
    }
 };
