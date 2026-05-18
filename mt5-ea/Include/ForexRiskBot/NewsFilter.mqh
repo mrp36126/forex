@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef FOREX_RISK_BOT_NEWS_FILTER_MQH
+#define FOREX_RISK_BOT_NEWS_FILTER_MQH
 #include "Config.mqh"
 
 class CNewsFilter
@@ -52,3 +52,5 @@ public:
       return false;
    }
 };
+
+#endif

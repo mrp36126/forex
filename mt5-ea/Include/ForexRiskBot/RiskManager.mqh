@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef FOREX_RISK_BOT_RISK_MANAGER_MQH
+#define FOREX_RISK_BOT_RISK_MANAGER_MQH
 #include "Config.mqh"
 
 class CRiskManager
@@ -133,3 +133,5 @@ public:
       return (totalRiskMoney / balance) * 100.0;
    }
 };
+
+#endif

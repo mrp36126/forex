@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef FOREX_RISK_BOT_TRADE_MANAGER_MQH
+#define FOREX_RISK_BOT_TRADE_MANAGER_MQH
 #include <Trade/Trade.mqh>
 #include "Config.mqh"
 
@@ -68,4 +68,25 @@ public:
       }
       return true;
    }
+
+   bool AreStopsValid(const string symbol, const TradeDirection direction,
+                      const double entry, const double stopLoss, const double takeProfit,
+                      string &reason)
+   {
+      int stopsLevelPoints = (int)SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
+      double minimumDistance = stopsLevelPoints * SymbolInfoDouble(symbol, SYMBOL_POINT);
+      if(minimumDistance <= 0.0) return true;
+
+      double stopDistance = MathAbs(entry - stopLoss);
+      double targetDistance = MathAbs(takeProfit - entry);
+      if(stopDistance < minimumDistance || targetDistance < minimumDistance)
+      {
+         reason = "stop or target is inside broker minimum distance";
+         return false;
+      }
+
+      return true;
+   }
 };
+
+#endif

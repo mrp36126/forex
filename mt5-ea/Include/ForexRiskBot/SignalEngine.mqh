@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef FOREX_RISK_BOT_SIGNAL_ENGINE_MQH
+#define FOREX_RISK_BOT_SIGNAL_ENGINE_MQH
 #include "Config.mqh"
 
 class CSignalEngine
@@ -135,3 +135,5 @@ public:
       return DIR_NONE;
    }
 };
+
+#endif

@@ -68,3 +68,4 @@ More detailed instructions are included in the docs files.
 - `docs/live-trading-checklist.md` — go-live gate
 - `docs/setup.md` — installation, MT5, Supabase, and Vercel setup
 - `docs/architecture.md` — component boundaries and sentiment-service design
+- `docs/strategy-tester.md` — first Strategy Tester run and what to inspect

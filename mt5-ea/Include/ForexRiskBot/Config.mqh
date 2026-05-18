@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef FOREX_RISK_BOT_CONFIG_MQH
+#define FOREX_RISK_BOT_CONFIG_MQH
 
 input double RiskPercent = 0.50;
 input double MaxDailyLossPercent = 2.00;
@@ -51,3 +51,5 @@ enum SentimentState
    SENTIMENT_BEARISH = -1,
    SENTIMENT_HIGH_UNCERTAINTY = 2
 };
+
+#endif

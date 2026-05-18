@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef FOREX_RISK_BOT_LOGGER_MQH
+#define FOREX_RISK_BOT_LOGGER_MQH
 
 class CBotLogger
 {
@@ -13,3 +13,5 @@ public:
       Print("[DECISION] symbol=", symbol, " action=", action, " reason=", reason);
    }
 };
+
+#endif
