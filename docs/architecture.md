@@ -1,4 +1,4 @@
-# Architecture
+﻿# Architecture
 
 ## Components
 
@@ -8,6 +8,7 @@
 | Sentiment service | Fetch approved news sources and classify market tone | No |
 | Supabase | Store settings, logs, sentiment snapshots, risk events, backtests | No |
 | Vercel dashboard | Read-only monitoring and reporting | No |
+| Research layer | Maintain pair notes, macro context, and post-trade review taxonomy | No |
 
 ## Data flow
 
@@ -17,6 +18,16 @@
 4. If enabled, it queries a separate sentiment layer.
 5. It either opens a trade or records `NO TRADE` with the reason.
 6. Logs are persisted for review and dashboard display.
+
+## Research-layer additions
+
+Future monitoring should support:
+
+- approved-pair list and pair notes;
+- macro context snapshots by currency;
+- cross-market context such as broad USD tone and rate expectations;
+- post-trade classification;
+- separation between "valid loss" and "bad trade."
 
 ## Sentiment service contract
 

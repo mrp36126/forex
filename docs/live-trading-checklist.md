@@ -1,5 +1,4 @@
-
-# Live-trading readiness checklist
+﻿# Live-trading readiness checklist
 
 Do not enable live trading until all boxes below are true.
 
@@ -9,6 +8,7 @@ Do not enable live trading until all boxes below are true.
 - [ ] Every trade and blocked trade is logged with a clear reason.
 - [ ] All live inputs match the tested configuration.
 - [ ] No martingale, grid, or averaging-down logic exists.
+- [ ] Approved trading pairs are intentionally limited and documented.
 
 ## Risk controls
 
@@ -27,11 +27,12 @@ Do not enable live trading until all boxes below are true.
 
 ## Backtest and demo evidence
 
-- [ ] At least `2–3 years` of realistic backtests completed.
+- [ ] At least `2-3 years` of realistic backtests completed.
 - [ ] Out-of-sample test passed.
-- [ ] Demo forward test completed for `4–8 weeks`.
+- [ ] Demo forward test completed for `4-8 weeks`.
 - [ ] Demo results are reasonably consistent with backtest expectations.
 - [ ] Execution quality is acceptable.
+- [ ] Losses have been reviewed by category, not only by P/L.
 
 ## Operational readiness
 

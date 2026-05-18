@@ -1,5 +1,4 @@
-
-# Risk rules
+﻿# Risk rules
 
 ## Core principle
 
@@ -8,6 +7,8 @@ The first job of the robot is survival. A small account cannot absorb reckless s
 ## Capital and return expectations
 
 Trying to generate about `R100/day` from `R1000` means targeting roughly `10%` per day before costs. That is a high-risk expectation and must never drive position sizing or trade frequency.
+
+Low leverage is treated as a positive design choice. Large notional exposure is not evidence of sophistication; for a small account, it usually increases fragility faster than it increases opportunity.
 
 ## Per-trade controls
 
@@ -35,6 +36,7 @@ Trying to generate about `R100/day` from `R1000` means targeting roughly `10%` p
 
 - One open position per symbol.
 - Maximum total open risk across all positions.
+- Avoid loading several highly correlated USD exposures that are effectively the same macro bet.
 - Block trades when:
   - spread exceeds threshold,
   - slippage is unacceptable,
@@ -51,6 +53,12 @@ Trying to generate about `R100/day` from `R1000` means targeting roughly `10%` p
 - Break-even is optional after `1R`.
 - Trailing is optional and should not be enabled until it has been tested across regimes.
 
+## Rollover and holding-cost awareness
+
+- Track swap / rollover costs during validation.
+- Do not treat multi-day holds as costless.
+- Avoid carrying positions through known high-risk events unless that behavior has been tested deliberately.
+
 ## Forbidden behaviors
 
 - Martingale.
@@ -65,3 +73,14 @@ Trying to generate about `R100/day` from `R1000` means targeting roughly `10%` p
 When data is missing, sentiment is unclear, news timing is uncertain, or execution costs are elevated, the correct action is:
 
 > `NO TRADE`
+
+## Required review after losses
+
+Every losing trade should later be classified as one of:
+
+- valid setup, normal loss;
+- bad regime;
+- news / macro conflict;
+- execution issue;
+- rule violation;
+- strategy defect.

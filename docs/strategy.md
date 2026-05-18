@@ -1,5 +1,4 @@
-
-# Strategy definition
+﻿# Strategy definition
 
 ## Objective
 
@@ -9,8 +8,10 @@ Build a rules-based forex strategy that trades rarely, with layered confirmation
 
 ### Instruments
 
-- Liquid major forex pairs only during initial validation, such as EURUSD, GBPUSD, USDJPY, AUDUSD.
+- Liquid major forex pairs only during initial validation, such as EURUSD, GBPUSD, USDJPY, and AUDUSD.
 - Avoid exotic pairs until symbol-specific spread, slippage, and session behavior have been measured.
+- Start with a small approved universe and learn those pairs deeply before expanding.
+- Pair selection should consider spread, liquidity, event sensitivity, session behavior, correlation with existing exposure, and whether there is a clear macro explanation for the pair.
 
 ### Timeframes
 
@@ -54,6 +55,7 @@ All required:
 4. A recent pullback has occurred toward EMA 50 or a recent support area.
 5. RSI is above the oversold threshold but below overbought territory.
 6. Spread, session, risk, news, and sentiment filters all approve.
+7. Macro context is not marked as high uncertainty or strongly opposed to the technical direction.
 
 Optional confirmations:
 
@@ -70,6 +72,7 @@ Mirror image of the long setup:
 4. A recent pullback has occurred toward EMA 50 or resistance.
 5. RSI is below the overbought threshold but above oversold territory.
 6. All operational filters approve.
+7. Macro context is not marked as high uncertainty or strongly opposed to the technical direction.
 
 ### News filter
 
@@ -77,6 +80,7 @@ Mirror image of the long setup:
 - Default blackout window: 45 minutes before and 45 minutes after.
 - The EA should use MT5 Economic Calendar data where available.
 - All calendar times must be interpreted in broker trade-server time.
+- Treat central-bank decisions, inflation data, labor-market releases, and major geopolitical shocks as regime-changing information, not ordinary noise.
 
 ### Sentiment filter
 
@@ -84,6 +88,22 @@ Mirror image of the long setup:
 - Allowed states: `bullish`, `bearish`, `neutral`, `high_uncertainty`.
 - If confidence is below threshold, stale, conflicting, or high uncertainty, block the trade.
 - Sentiment may veto a trade; it may not create one by itself.
+
+### Macro context layer
+
+The strategy should maintain a non-execution macro context for each currency:
+
+- central-bank bias;
+- interest-rate direction;
+- inflation trend;
+- growth / labor-market tone;
+- major geopolitical risk.
+
+This layer should not place trades. It should only:
+
+- confirm that the technical direction is not fighting a dominant macro backdrop;
+- mark the environment as `high uncertainty`;
+- require extra caution around currency pairs whose drivers are currently unstable.
 
 ### Exit logic
 
@@ -101,3 +121,4 @@ This strategy is intentionally unglamorous:
 - It is easy to test honestly.
 - It creates traceable reasons for every decision.
 - It is naturally selective, which is appropriate for small capital and strict risk control.
+- It respects that currencies are driven by both charts and macro forces.
