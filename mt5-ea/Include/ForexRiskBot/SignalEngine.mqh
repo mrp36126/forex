@@ -180,7 +180,7 @@ public:
          return DIR_SELL;
       }
 
-      if(AllowBuy && bullishTrend && bullishBreakout && bullishStructure &&
+      if(AllowBuy && AllowLongBreakouts && bullishTrend && bullishBreakout && bullishStructure &&
          breakoutBodyPoints >= MinimumBreakoutBodyPoints &&
          rsi > 50.0 && roomToResistancePoints >= MinimumObstacleDistancePoints)
       {
@@ -188,7 +188,7 @@ public:
          return DIR_BUY;
       }
 
-      if(AllowSell && bearishTrend && bearishBreakout && bearishStructure &&
+      if(AllowSell && AllowShortBreakouts && bearishTrend && bearishBreakout && bearishStructure &&
          breakoutBodyPoints >= MinimumBreakoutBodyPoints &&
          rsi < 50.0 && roomToSupportPoints >= MinimumObstacleDistancePoints)
       {
