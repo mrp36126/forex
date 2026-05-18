@@ -12,6 +12,7 @@ Build a rules-based forex strategy that trades rarely, with layered confirmation
 - Avoid exotic pairs until symbol-specific spread, slippage, and session behavior have been measured.
 - Start with a small approved universe and learn those pairs deeply before expanding.
 - Pair selection should consider spread, liquidity, event sensitivity, session behavior, correlation with existing exposure, and whether there is a clear macro explanation for the pair.
+- A pair being available from the broker is not enough; it must also be liquid, understandable, and individually validated.
 
 ### Timeframes
 
@@ -57,6 +58,7 @@ The live signal model should distinguish:
 - Trading windows should eventually be configured by symbol rather than assumed universal.
 - Each pair should be validated for its own active hours.
 - Weak hours discovered in backtesting should be treated as validation targets before being allowed live.
+- Session boundaries and low-liquidity periods should be treated as execution-risk zones, not merely quiet chart periods.
 
 ### Long entry logic
 
@@ -100,6 +102,7 @@ Mirror image of the long setup:
 - The EA should use MT5 Economic Calendar data where available.
 - All calendar times must be interpreted in broker trade-server time.
 - Treat central-bank decisions, inflation data, labor-market releases, and major geopolitical shocks as regime-changing information, not ordinary noise.
+- News protection exists for two reasons: directional uncertainty and degraded execution quality such as spread widening or violent whipsaws.
 
 ### Sentiment filter
 

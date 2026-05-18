@@ -38,6 +38,7 @@
 - Performance by macro regime and major event windows.
 - Performance by trading hour and by market regime.
 - Correlated exposure impact when multiple pairs are tested together.
+- Normal-spread periods vs widened-spread periods around opens, closes, and major events.
 
 ## Reject the strategy if
 
@@ -49,6 +50,7 @@
 - Optimization creates a "perfect" curve that cannot be explained economically.
 - Results only work on one pair while the stated rationale claims a broader edge.
 - Profit comes from quietly accumulating correlated exposure rather than distinct opportunities.
+- Performance depends on unrealistic assumption that spreads remain stable during illiquid or news-heavy windows.
 
 ## Validation sequence
 
@@ -64,4 +66,5 @@
 - Did performance depend on a period of unusually favorable macro conditions?
 - Were rollover, spreads, and event risk realistically represented?
 - Did the strategy stay specialized and understandable, or become a parameter maze?
+- Did the apparent edge survive after excluding thin-liquidity and abnormal-spread conditions?
 

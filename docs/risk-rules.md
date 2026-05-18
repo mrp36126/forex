@@ -10,6 +10,8 @@ Trying to generate about `R100/day` from `R1000` means targeting roughly `10%` p
 
 Low leverage is treated as a positive design choice. Large notional exposure is not evidence of sophistication; for a small account, it usually increases fragility faster than it increases opportunity.
 
+The broker's maximum available leverage is not the robot's risk budget. ForexRiskBot sizes from stop distance and account risk, not from how much margin the broker is willing to lend.
+
 ## Per-trade controls
 
 - Default risk per trade: `0.50%` of account balance.
@@ -45,6 +47,7 @@ Low leverage is treated as a positive design choice. Large notional exposure is 
   - near illiquid session boundaries,
   - daily brakes are active,
   - risk budget is exhausted.
+- Prefer fewer, higher-quality positions over many simultaneous bets.
 
 ## Exit controls
 
@@ -74,6 +77,8 @@ Low leverage is treated as a positive design choice. Large notional exposure is 
 When data is missing, sentiment is unclear, news timing is uncertain, or execution costs are elevated, the correct action is:
 
 > `NO TRADE`
+
+Open-market access is not the same as good trading conditions. The robot must be willing to stay idle when liquidity, spreads, or event risk make the edge unclear.
 
 ## Required review after losses
 
