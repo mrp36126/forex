@@ -73,3 +73,4 @@ More detailed instructions are included in the docs files.
 - docs/book-review-currency-trading-for-dummies.md - applied lessons from the full supplied book
 - docs/book-review-day-trading-and-swing-trading.md - applied lessons from Kathy Lien's currency-market framework
 - docs/book-review-forex-trading-basics-secrets.md - selective lessons adopted from the beginner-focused forex handbook
+- docs/book-review-forex-patterns-and-probabilities.md - applied lessons on regime separation, filtered breakouts, and robust validation

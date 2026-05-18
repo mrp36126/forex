@@ -80,6 +80,12 @@ When data is missing, sentiment is unclear, news timing is uncertain, or executi
 
 Open-market access is not the same as good trading conditions. The robot must be willing to stay idle when liquidity, spreads, or event risk make the edge unclear.
 
+## Process before outcome
+
+- A valid loss is normal business.
+- An invalid win is still a rule failure.
+- Risk review should distinguish bad luck from bad execution, otherwise optimization will reward the wrong behavior.
+
 ## Required review after losses
 
 Every losing trade should later be classified as one of:

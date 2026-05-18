@@ -39,6 +39,7 @@
 - Performance by trading hour and by market regime.
 - Correlated exposure impact when multiple pairs are tested together.
 - Normal-spread periods vs widened-spread periods around opens, closes, and major events.
+- Rule-adherent losing trades vs rule-breaking winning trades.
 
 ## Reject the strategy if
 
@@ -51,6 +52,7 @@
 - Results only work on one pair while the stated rationale claims a broader edge.
 - Profit comes from quietly accumulating correlated exposure rather than distinct opportunities.
 - Performance depends on unrealistic assumption that spreads remain stable during illiquid or news-heavy windows.
+- A beautiful backtest cannot be explained by a simple, durable market tendency.
 
 ## Validation sequence
 
@@ -59,6 +61,13 @@
 3. Walk-forward or rolling out-of-sample test.
 4. Demo forward test for `4-8 weeks`.
 5. Compare expected vs realized slippage, spread, fills, and blocked trades.
+
+## Process quality checks
+
+- A losing trade is acceptable if it followed the rules.
+- A winning trade is a defect if it violated the rules.
+- Review blocked trades as seriously as executed trades; a selective system proves itself partly through what it refuses.
+- If a result only exists after repeated parameter hunting, treat it as suspect until proven otherwise.
 
 ## Book-informed review questions
 

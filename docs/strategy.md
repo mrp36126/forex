@@ -47,11 +47,15 @@ The first implementation uses recent swing highs/lows over a configurable lookba
 
 This is deliberately simple and testable. More advanced swing logic can be added later only if it improves out-of-sample robustness.
 
+Support and resistance should be treated as zones with practical buffers, not as exact single-price lines.
+
 The live signal model should distinguish:
 
 - **trend continuation**: EMA alignment, slope, advancing structure, pullback, and confirmation;
 - **breakout continuation**: a genuine level break with follow-through;
 - **range / no-trade regime**: compressed structure or insufficient room to the next obstacle.
+
+These are separate playbooks, not interchangeable labels. A market classified as range-bound should not be allowed to borrow a trend-continuation entry just because the latest candle looks appealing.
 
 ### Pair-specific timing
 
@@ -79,6 +83,8 @@ Optional confirmations:
 
 - MACD histogram above zero.
 - Tick volume not materially below recent average.
+
+Trend quality should be judged by organization as well as direction: aligned and sloping moving averages are healthier evidence than a recent crossover surrounded by flat, tangled averages.
 
 ### Short entry logic
 
@@ -134,6 +140,7 @@ This layer should not place trades. It should only:
 - Optional break-even after `1R`.
 - Optional trailing stop after trade proves itself.
 - Opposite signals should normally block new entries, not trigger emotional exits.
+- Tiny profit targets that are disproportionately consumed by spread and slippage are intentionally avoided.
 
 ## Why this baseline
 
