@@ -182,14 +182,20 @@ void OnTick()
    riskManager.RegisterTradeOpened();
    if(direction == DIR_BUY) buyCount++;
    if(direction == DIR_SELL) sellCount++;
-   logger.Info(StringFormat("trade plan symbol=%s direction=%s lots=%.2f entry=%.5f sl=%.5f tp=%.5f rr=%.2f",
+   string setupType = StringFind(reason, "breakout") >= 0 ? "breakout" : "pullback";
+   MqlDateTime tradeTimeParts;
+   TimeToStruct(TimeCurrent(), tradeTimeParts);
+   logger.Info(StringFormat("trade plan symbol=%s direction=%s setup=%s lots=%.2f entry=%.5f sl=%.5f tp=%.5f rr=%.2f atr_points=%.1f hour=%d",
                             _Symbol,
                             direction == DIR_BUY ? "BUY" : "SELL",
+                            setupType,
                             lots,
                             entry,
                             sl,
                             tp,
-                            RewardRiskRatio));
+                            RewardRiskRatio,
+                            signalEngine.CurrentATRPoints(),
+                            tradeTimeParts.hour));
    logger.Decision(_Symbol, direction == DIR_BUY ? "BUY" : "SELL", "entry accepted: " + reason);
 }
 

@@ -43,6 +43,9 @@ input int    MinimumTrendSlopePoints = 20;
 input int    BreakoutBufferPoints = 10;
 input int    MinStructureRangePoints = 120;
 input int    MinimumObstacleDistancePoints = 80;
+input bool   AllowLongPullbacks = false;
+input bool   AllowShortPullbacks = true;
+input int    MinimumBreakoutBodyPoints = 35;
 
 enum TradeDirection
 {

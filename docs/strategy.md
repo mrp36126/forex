@@ -63,6 +63,7 @@ All required:
 6. Spread, session, risk, news, and sentiment filters all approve.
 7. Macro context is not marked as high uncertainty or strongly opposed to the technical direction.
 8. Structure is progressing upward and there is enough room before the next resistance obstacle.
+9. Long pullbacks remain disabled by default until they show evidence in testing.
 
 Optional confirmations:
 
@@ -81,6 +82,7 @@ Mirror image of the long setup:
 6. All operational filters approve.
 7. Macro context is not marked as high uncertainty or strongly opposed to the technical direction.
 8. Structure is progressing downward and there is enough room before the next support obstacle.
+9. Short pullbacks may remain enabled if they continue to survive validation.
 
 ### News filter
 

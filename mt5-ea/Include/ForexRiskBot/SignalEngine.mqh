@@ -72,6 +72,13 @@ public:
       return value;
    }
 
+   double CurrentATRPoints()
+   {
+      double atr = CurrentATR();
+      if(atr <= 0.0) return 0.0;
+      return atr / _Point;
+   }
+
    TradeDirection Evaluate(const string symbol, string &reason)
    {
       double fastTrend, slowTrend, fastTrendPast, slowTrendPast, fastEntry, slowEntry, rsi, macdMain = 0.0, macdSignal = 0.0;
@@ -131,6 +138,7 @@ public:
       bool bearishStructure = recentHigh < previousHigh && recentLow < previousLow;
       bool bullishBreakout = rates[0].close > previousHigh + BreakoutBufferPoints * _Point;
       bool bearishBreakout = rates[0].close < previousLow - BreakoutBufferPoints * _Point;
+      double breakoutBodyPoints = MathAbs(rates[0].close - rates[0].open) / _Point;
       double roomToResistancePoints = MathMax(0.0, (recentHigh - close1) / _Point);
       double roomToSupportPoints = MathMax(0.0, (close1 - recentLow) / _Point);
       bool inRange = structureRangePoints < MinStructureRangePoints;
@@ -150,7 +158,7 @@ public:
          return DIR_NONE;
       }
 
-      if(AllowBuy && bullishTrend && fastEntry > slowEntry && nearFastEma &&
+      if(AllowBuy && AllowLongPullbacks && bullishTrend && fastEntry > slowEntry && nearFastEma &&
          rsi > RSIOversold && rsi < RSIOverbought &&
          (!UseMACDConfirmation || macdMain > macdSignal) &&
          (!RequireConfirmationCandle || bullishConfirmation) &&
@@ -161,7 +169,7 @@ public:
          return DIR_BUY;
       }
 
-      if(AllowSell && bearishTrend && fastEntry < slowEntry && nearFastEma &&
+      if(AllowSell && AllowShortPullbacks && bearishTrend && fastEntry < slowEntry && nearFastEma &&
          rsi < RSIOverbought && rsi > RSIOversold &&
          (!UseMACDConfirmation || macdMain < macdSignal) &&
          (!RequireConfirmationCandle || bearishConfirmation) &&
@@ -173,6 +181,7 @@ public:
       }
 
       if(AllowBuy && bullishTrend && bullishBreakout && bullishStructure &&
+         breakoutBodyPoints >= MinimumBreakoutBodyPoints &&
          rsi > 50.0 && roomToResistancePoints >= MinimumObstacleDistancePoints)
       {
          reason = "bullish breakout continuation confirmed";
@@ -180,6 +189,7 @@ public:
       }
 
       if(AllowSell && bearishTrend && bearishBreakout && bearishStructure &&
+         breakoutBodyPoints >= MinimumBreakoutBodyPoints &&
          rsi < 50.0 && roomToSupportPoints >= MinimumObstacleDistancePoints)
       {
          reason = "bearish breakout continuation confirmed";
