@@ -40,13 +40,14 @@ input bool   RequireConfirmationCandle = true;
 input int    MinATRPoints = 40;
 input int    TrendSlopeLookbackBars = 5;
 input int    MinimumTrendSlopePoints = 20;
+input int    MinimumTrendSeparationPoints = 20;
 input int    BreakoutBufferPoints = 10;
 input int    MinStructureRangePoints = 120;
 input int    MinimumObstacleDistancePoints = 80;
-input bool   AllowLongPullbacks = false;
+input bool   AllowLongPullbacks = true;
 input bool   AllowShortPullbacks = true;
 input bool   AllowLongBreakouts = false;
-input bool   AllowShortBreakouts = true;
+input bool   AllowShortBreakouts = false;
 input int    MinimumBreakoutBodyPoints = 35;
 
 enum TradeDirection

@@ -125,20 +125,23 @@ public:
       double structureRangePoints = (recentHigh - recentLow) / _Point;
       double fastSlopePoints = (fastTrend - fastTrendPast) / _Point;
       double slowSlopePoints = (slowTrend - slowTrendPast) / _Point;
+      double trendSeparationPoints = MathAbs(fastTrend - slowTrend) / _Point;
       bool bullishTrend = fastTrend > slowTrend && close1 > slowTrend &&
                           fastSlopePoints >= MinimumTrendSlopePoints &&
-                          slowSlopePoints >= 0.0;
+                          slowSlopePoints >= 0.0 &&
+                          trendSeparationPoints >= MinimumTrendSeparationPoints;
       bool bearishTrend = fastTrend < slowTrend && close1 < slowTrend &&
                           fastSlopePoints <= -MinimumTrendSlopePoints &&
-                          slowSlopePoints <= 0.0;
-      bool nearFastEma = MathAbs(close1 - fastEntry) <= PullbackTolerancePoints * _Point;
+                          slowSlopePoints <= 0.0 &&
+                          trendSeparationPoints >= MinimumTrendSeparationPoints;
+      bool bullishPullbackTouched = rates[1].low <= fastEntry + PullbackTolerancePoints * _Point &&
+                                    rates[1].close >= slowEntry;
+      bool bearishPullbackTouched = rates[1].high >= fastEntry - PullbackTolerancePoints * _Point &&
+                                    rates[1].close <= slowEntry;
       bool bullishConfirmation = rates[0].close > fastEntry && rates[0].close > rates[1].high;
       bool bearishConfirmation = rates[0].close < fastEntry && rates[0].close < rates[1].low;
       bool bullishStructure = recentHigh > previousHigh && recentLow > previousLow;
       bool bearishStructure = recentHigh < previousHigh && recentLow < previousLow;
-      bool bullishBreakout = rates[0].close > previousHigh + BreakoutBufferPoints * _Point;
-      bool bearishBreakout = rates[0].close < previousLow - BreakoutBufferPoints * _Point;
-      double breakoutBodyPoints = MathAbs(rates[0].close - rates[0].open) / _Point;
       double roomToResistancePoints = MathMax(0.0, (recentHigh - close1) / _Point);
       double roomToSupportPoints = MathMax(0.0, (close1 - recentLow) / _Point);
       bool inRange = structureRangePoints < MinStructureRangePoints;
@@ -158,45 +161,29 @@ public:
          return DIR_NONE;
       }
 
-      if(AllowBuy && AllowLongPullbacks && bullishTrend && fastEntry > slowEntry && nearFastEma &&
+      if(AllowBuy && AllowLongPullbacks && bullishTrend && fastEntry > slowEntry && bullishPullbackTouched &&
          rsi > RSIOversold && rsi < RSIOverbought &&
          (!UseMACDConfirmation || macdMain > macdSignal) &&
          (!RequireConfirmationCandle || bullishConfirmation) &&
          bullishStructure &&
          roomToResistancePoints >= MinimumObstacleDistancePoints)
       {
-         reason = "bullish trend continuation confirmed";
+         reason = "trend_pullback bullish organized trend, pullback touched, resumption confirmed";
          return DIR_BUY;
       }
 
-      if(AllowSell && AllowShortPullbacks && bearishTrend && fastEntry < slowEntry && nearFastEma &&
+      if(AllowSell && AllowShortPullbacks && bearishTrend && fastEntry < slowEntry && bearishPullbackTouched &&
          rsi < RSIOverbought && rsi > RSIOversold &&
          (!UseMACDConfirmation || macdMain < macdSignal) &&
          (!RequireConfirmationCandle || bearishConfirmation) &&
          bearishStructure &&
          roomToSupportPoints >= MinimumObstacleDistancePoints)
       {
-         reason = "bearish trend continuation confirmed";
+         reason = "trend_pullback bearish organized trend, pullback touched, resumption confirmed";
          return DIR_SELL;
       }
 
-      if(AllowBuy && AllowLongBreakouts && bullishTrend && bullishBreakout && bullishStructure &&
-         breakoutBodyPoints >= MinimumBreakoutBodyPoints &&
-         rsi > 50.0 && roomToResistancePoints >= MinimumObstacleDistancePoints)
-      {
-         reason = "bullish breakout continuation confirmed";
-         return DIR_BUY;
-      }
-
-      if(AllowSell && AllowShortBreakouts && bearishTrend && bearishBreakout && bearishStructure &&
-         breakoutBodyPoints >= MinimumBreakoutBodyPoints &&
-         rsi < 50.0 && roomToSupportPoints >= MinimumObstacleDistancePoints)
-      {
-         reason = "bearish breakout continuation confirmed";
-         return DIR_SELL;
-      }
-
-      reason = "regime, structure, obstacle, or confirmation filter blocked trade";
+      reason = "trend_pullback blocked: regime, pullback, structure, obstacle, or confirmation missing";
       return DIR_NONE;
    }
 };
