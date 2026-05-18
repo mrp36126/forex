@@ -1,0 +1,17 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, sans-serif;
+  background: #08111f;
+  color: #e5edf8;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: #08111f; color: #e5edf8; }
+main { max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+h1, h2 { margin: 0 0 12px; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.card { background: #0f1b2d; border: 1px solid #20324c; border-radius: 16px; padding: 18px; }
+.muted { color: #9db0c8; }
+.value { font-size: 1.8rem; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px 8px; border-bottom: 1px solid #20324c; text-align: left; font-size: 0.95rem; }
