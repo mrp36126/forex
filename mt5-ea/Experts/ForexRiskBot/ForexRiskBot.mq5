@@ -4,12 +4,14 @@
 #include <ForexRiskBot/Config.mqh>
 #include <ForexRiskBot/Logger.mqh>
 #include <ForexRiskBot/NewsFilter.mqh>
+#include <ForexRiskBot/ResearchLogger.mqh>
 #include <ForexRiskBot/RiskManager.mqh>
 #include <ForexRiskBot/SignalEngine.mqh>
 #include <ForexRiskBot/TradeManager.mqh>
 
 CBotLogger   logger;
 CNewsFilter  newsFilter;
+CResearchLogger researchLogger;
 CRiskManager riskManager;
 CSignalEngine signalEngine;
 CTradeManager tradeManager;
@@ -30,6 +32,24 @@ int sentimentBlockCount = 0;
 int volatilityBlockCount = 0;
 int stopValidationBlockCount = 0;
 int lotSizeBlockCount = 0;
+string currentOpenSetupType = "unknown";
+string currentOpenDirection = "NONE";
+double currentOpenAtrPoints = 0.0;
+
+string DetectSetupType(const string reason)
+{
+   if(StringFind(reason, "compression_breakout") >= 0) return "compression_breakout";
+   if(StringFind(reason, "trend_pullback") >= 0) return "trend_pullback";
+   if(StringFind(reason, "regime=range") >= 0) return "range";
+   return "unknown";
+}
+
+string DirectionText(const TradeDirection direction)
+{
+   if(direction == DIR_BUY) return "BUY";
+   if(direction == DIR_SELL) return "SELL";
+   return "NONE";
+}
 
 void RecordNoTradeCategory(const string reason)
 {
@@ -68,6 +88,23 @@ void RecordNoTrade(const string reason)
    noTradeCount++;
    RecordNoTradeCategory(reason);
    logger.Decision(_Symbol, "NO TRADE", reason);
+   if(LogBlockedSignalsToCsv)
+   {
+      researchLogger.LogEvent(_Symbol,
+                              "BLOCKED",
+                              "NO_TRADE",
+                              DetectSetupType(reason),
+                              "NONE",
+                              signalEngine.CurrentATRPoints(),
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              RewardRiskRatio,
+                              0.0,
+                              0,
+                              reason);
+   }
 }
 
 bool IsNewEntryBar()
@@ -115,6 +152,7 @@ int OnInit()
    }
 
    tradeManager.Init();
+   researchLogger.Init(_Symbol);
    riskManager.RefreshDay();
    if(!signalEngine.Init(_Symbol))
    {
@@ -145,6 +183,7 @@ void OnDeinit(const int reason)
                   lotSizeBlockCount);
    }
    signalEngine.Release();
+   researchLogger.Close();
    logger.Info("deinitialized ForexRiskBot");
 }
 
@@ -238,9 +277,7 @@ void OnTick()
    riskManager.RegisterTradeOpened();
    if(direction == DIR_BUY) buyCount++;
    if(direction == DIR_SELL) sellCount++;
-   string setupType = "unknown";
-   if(StringFind(reason, "compression_breakout") >= 0) setupType = "compression_breakout";
-   else if(StringFind(reason, "trend_pullback") >= 0) setupType = "trend_pullback";
+   string setupType = DetectSetupType(reason);
    MqlDateTime tradeTimeParts;
    TimeToStruct(TimeCurrent(), tradeTimeParts);
    logger.Info(StringFormat("trade plan symbol=%s direction=%s setup=%s lots=%.2f entry=%.5f sl=%.5f tp=%.5f rr=%.2f atr_points=%.1f hour=%d",
@@ -255,6 +292,23 @@ void OnTick()
                             signalEngine.CurrentATRPoints(),
                             tradeTimeParts.hour));
    logger.Decision(_Symbol, direction == DIR_BUY ? "BUY" : "SELL", "entry accepted: " + reason);
+   researchLogger.LogEvent(_Symbol,
+                           "TRADE_PLAN",
+                           direction == DIR_BUY ? "BUY" : "SELL",
+                           setupType,
+                           DirectionText(direction),
+                           signalEngine.CurrentATRPoints(),
+                           lots,
+                           entry,
+                           sl,
+                           tp,
+                           RewardRiskRatio,
+                           0.0,
+                           0,
+                           reason);
+   currentOpenSetupType = setupType;
+   currentOpenDirection = DirectionText(direction);
+   currentOpenAtrPoints = signalEngine.CurrentATRPoints();
 }
 
 void OnTradeTransaction(const MqlTradeTransaction &trans,
@@ -271,6 +325,24 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
                  + HistoryDealGetDouble(trans.deal, DEAL_SWAP)
                  + HistoryDealGetDouble(trans.deal, DEAL_COMMISSION);
    riskManager.RegisterClosedTrade(profit);
+   string dealSymbol = HistoryDealGetString(trans.deal, DEAL_SYMBOL);
+   researchLogger.LogEvent(dealSymbol,
+                           "TRADE_CLOSE",
+                           "CLOSE",
+                           currentOpenSetupType,
+                           currentOpenDirection,
+                           currentOpenAtrPoints,
+                           HistoryDealGetDouble(trans.deal, DEAL_VOLUME),
+                           HistoryDealGetDouble(trans.deal, DEAL_PRICE),
+                           0.0,
+                           0.0,
+                           RewardRiskRatio,
+                           profit,
+                           trans.deal,
+                           "closed trade");
+   currentOpenSetupType = "unknown";
+   currentOpenDirection = "NONE";
+   currentOpenAtrPoints = 0.0;
 }
 
 double OnTester()
