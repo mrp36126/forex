@@ -70,8 +70,12 @@ The script summarizes:
 - action counts;
 - rows by hour;
 - blocked reason prefixes;
+- blocker condition tags;
 - closed-trade P/L by setup;
-- closed-trade P/L by hour.
+- closed-trade P/L by direction;
+- closed-trade P/L by hour;
+- closed-trade P/L by ATR bucket;
+- closed-trade P/L by spread bucket.
 
 ## Safety note
 
