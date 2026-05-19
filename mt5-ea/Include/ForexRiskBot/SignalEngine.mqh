@@ -22,6 +22,14 @@ private:
       return true;
    }
 
+   void AddBlocker(string &details, const string blocker)
+   {
+      if(details == "")
+         details = blocker;
+      else
+         details += ", " + blocker;
+   }
+
 public:
    CSignalEngine()
    {
@@ -157,33 +165,77 @@ public:
 
       if(inRange)
       {
-         reason = "range regime detected";
+         reason = StringFormat("regime=range structure_range_points=%.1f min_required=%d",
+                               structureRangePoints,
+                               MinStructureRangePoints);
          return DIR_NONE;
       }
 
-      if(AllowBuy && AllowLongPullbacks && bullishTrend && fastEntry > slowEntry && bullishPullbackTouched &&
-         rsi > RSIOversold && rsi < RSIOverbought &&
-         (!UseMACDConfirmation || macdMain > macdSignal) &&
-         (!RequireConfirmationCandle || bullishConfirmation) &&
-         bullishStructure &&
-         roomToResistancePoints >= MinimumObstacleDistancePoints)
+      bool buyEnabled = AllowBuy && AllowLongPullbacks;
+      bool buyEntryAligned = fastEntry > slowEntry;
+      bool buyRsiValid = rsi > RSIOversold && rsi < RSIOverbought;
+      bool buyMacdValid = !UseMACDConfirmation || macdMain > macdSignal;
+      bool buyConfirmationValid = !RequireConfirmationCandle || bullishConfirmation;
+      bool buyRoomValid = roomToResistancePoints >= MinimumObstacleDistancePoints;
+
+      if(buyEnabled && bullishTrend && buyEntryAligned && bullishPullbackTouched &&
+         buyRsiValid && buyMacdValid && buyConfirmationValid && bullishStructure && buyRoomValid)
       {
-         reason = "trend_pullback bullish organized trend, pullback touched, resumption confirmed";
+         reason = StringFormat("playbook=trend_pullback regime=bullish accepted pullback=ema50 confirmation=%s rsi=%.1f room_points=%.1f",
+                               RequireConfirmationCandle ? "candle" : "disabled",
+                               rsi,
+                               roomToResistancePoints);
          return DIR_BUY;
       }
 
-      if(AllowSell && AllowShortPullbacks && bearishTrend && fastEntry < slowEntry && bearishPullbackTouched &&
-         rsi < RSIOverbought && rsi > RSIOversold &&
-         (!UseMACDConfirmation || macdMain < macdSignal) &&
-         (!RequireConfirmationCandle || bearishConfirmation) &&
-         bearishStructure &&
-         roomToSupportPoints >= MinimumObstacleDistancePoints)
+      bool sellEnabled = AllowSell && AllowShortPullbacks;
+      bool sellEntryAligned = fastEntry < slowEntry;
+      bool sellRsiValid = rsi < RSIOverbought && rsi > RSIOversold;
+      bool sellMacdValid = !UseMACDConfirmation || macdMain < macdSignal;
+      bool sellConfirmationValid = !RequireConfirmationCandle || bearishConfirmation;
+      bool sellRoomValid = roomToSupportPoints >= MinimumObstacleDistancePoints;
+
+      if(sellEnabled && bearishTrend && sellEntryAligned && bearishPullbackTouched &&
+         sellRsiValid && sellMacdValid && sellConfirmationValid && bearishStructure && sellRoomValid)
       {
-         reason = "trend_pullback bearish organized trend, pullback touched, resumption confirmed";
+         reason = StringFormat("playbook=trend_pullback regime=bearish accepted pullback=ema50 confirmation=%s rsi=%.1f room_points=%.1f",
+                               RequireConfirmationCandle ? "candle" : "disabled",
+                               rsi,
+                               roomToSupportPoints);
          return DIR_SELL;
       }
 
-      reason = "trend_pullback blocked: regime, pullback, structure, obstacle, or confirmation missing";
+      string buyBlockers = "";
+      if(!buyEnabled) AddBlocker(buyBlockers, "disabled");
+      if(!bullishTrend) AddBlocker(buyBlockers, "regime");
+      if(!buyEntryAligned) AddBlocker(buyBlockers, "entry_ema_alignment");
+      if(!bullishPullbackTouched) AddBlocker(buyBlockers, "pullback");
+      if(!buyRsiValid) AddBlocker(buyBlockers, "rsi");
+      if(!buyMacdValid) AddBlocker(buyBlockers, "macd");
+      if(!buyConfirmationValid) AddBlocker(buyBlockers, "confirmation");
+      if(!bullishStructure) AddBlocker(buyBlockers, "structure");
+      if(!buyRoomValid) AddBlocker(buyBlockers, "obstacle_room");
+
+      string sellBlockers = "";
+      if(!sellEnabled) AddBlocker(sellBlockers, "disabled");
+      if(!bearishTrend) AddBlocker(sellBlockers, "regime");
+      if(!sellEntryAligned) AddBlocker(sellBlockers, "entry_ema_alignment");
+      if(!bearishPullbackTouched) AddBlocker(sellBlockers, "pullback");
+      if(!sellRsiValid) AddBlocker(sellBlockers, "rsi");
+      if(!sellMacdValid) AddBlocker(sellBlockers, "macd");
+      if(!sellConfirmationValid) AddBlocker(sellBlockers, "confirmation");
+      if(!bearishStructure) AddBlocker(sellBlockers, "structure");
+      if(!sellRoomValid) AddBlocker(sellBlockers, "obstacle_room");
+
+      reason = StringFormat("playbook=trend_pullback blocked buy=[%s] sell=[%s] rsi=%.1f trend_sep_points=%.1f fast_slope_points=%.1f slow_slope_points=%.1f room_up_points=%.1f room_down_points=%.1f",
+                            buyBlockers,
+                            sellBlockers,
+                            rsi,
+                            trendSeparationPoints,
+                            fastSlopePoints,
+                            slowSlopePoints,
+                            roomToResistancePoints,
+                            roomToSupportPoints);
       return DIR_NONE;
    }
 };
