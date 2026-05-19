@@ -69,6 +69,7 @@ More detailed instructions are included in the docs files.
 - `docs/setup.md` â€” installation, MT5, Supabase, and Vercel setup
 - `docs/architecture.md` â€” component boundaries and sentiment-service design
 - `docs/strategy-tester.md` â€” first Strategy Tester run and what to inspect
+- `docs/trend-pullback-diagnostic-report-template.md` â€” repeatable review template for the current signal candidate
 - docs/book-notes-currency-trading-for-dummies.md - book-informed project principles
 - docs/book-review-currency-trading-for-dummies.md - applied lessons from the full supplied book
 - docs/book-review-day-trading-and-swing-trading.md - applied lessons from Kathy Lien's currency-market framework

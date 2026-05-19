@@ -19,10 +19,54 @@ int noTradeCount = 0;
 int buyCount = 0;
 int sellCount = 0;
 int rejectedOrderCount = 0;
+int outsideHoursBlockCount = 0;
+int spreadBlockCount = 0;
+int existingPositionBlockCount = 0;
+int riskBlockCount = 0;
+int newsBlockCount = 0;
+int signalRangeBlockCount = 0;
+int signalSetupBlockCount = 0;
+int sentimentBlockCount = 0;
+int volatilityBlockCount = 0;
+int stopValidationBlockCount = 0;
+int lotSizeBlockCount = 0;
+
+void RecordNoTradeCategory(const string reason)
+{
+   if(StringFind(reason, "outside trading hours") >= 0)
+      outsideHoursBlockCount++;
+   else if(StringFind(reason, "spread") >= 0)
+      spreadBlockCount++;
+   else if(StringFind(reason, "position already open") >= 0)
+      existingPositionBlockCount++;
+   else if(StringFind(reason, "daily") >= 0 ||
+           StringFind(reason, "consecutive") >= 0 ||
+           StringFind(reason, "risk") >= 0 ||
+           StringFind(reason, "profit target") >= 0)
+      riskBlockCount++;
+   else if(StringFind(reason, "news") >= 0 ||
+           StringFind(reason, "blackout") >= 0 ||
+           StringFind(reason, "calendar") >= 0)
+      newsBlockCount++;
+   else if(StringFind(reason, "regime=range") >= 0)
+      signalRangeBlockCount++;
+   else if(StringFind(reason, "playbook=trend_pullback blocked") >= 0)
+      signalSetupBlockCount++;
+   else if(StringFind(reason, "sentiment") >= 0)
+      sentimentBlockCount++;
+   else if(StringFind(reason, "atr") >= 0 ||
+           StringFind(reason, "volatility") >= 0)
+      volatilityBlockCount++;
+   else if(StringFind(reason, "stop") >= 0)
+      stopValidationBlockCount++;
+   else if(StringFind(reason, "lot size") >= 0)
+      lotSizeBlockCount++;
+}
 
 void RecordNoTrade(const string reason)
 {
    noTradeCount++;
+   RecordNoTradeCategory(reason);
    logger.Decision(_Symbol, "NO TRADE", reason);
 }
 
@@ -87,6 +131,18 @@ void OnDeinit(const int reason)
    {
       PrintFormat("[TESTER SUMMARY] symbol=%s no_trade=%d buys=%d sells=%d rejected_orders=%d",
                   _Symbol, noTradeCount, buyCount, sellCount, rejectedOrderCount);
+      PrintFormat("[TESTER BLOCKS] outside_hours=%d spread=%d existing_position=%d risk=%d news=%d signal_range=%d signal_setup=%d sentiment=%d volatility=%d stops=%d lot_size=%d",
+                  outsideHoursBlockCount,
+                  spreadBlockCount,
+                  existingPositionBlockCount,
+                  riskBlockCount,
+                  newsBlockCount,
+                  signalRangeBlockCount,
+                  signalSetupBlockCount,
+                  sentimentBlockCount,
+                  volatilityBlockCount,
+                  stopValidationBlockCount,
+                  lotSizeBlockCount);
    }
    signalEngine.Release();
    logger.Info("deinitialized ForexRiskBot");
