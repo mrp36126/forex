@@ -104,7 +104,8 @@ public:
 
       MqlRates rates[];
       ArraySetAsSeries(rates, true);
-      if(CopyRates(symbol, EntryTimeframe, 1, StructureLookbackBars + 2, rates) < StructureLookbackBars + 2)
+      int requiredBars = MathMax(StructureLookbackBars + 2, CompressionLookbackBars * 2 + 2);
+      if(CopyRates(symbol, EntryTimeframe, 1, requiredBars, rates) < requiredBars)
       {
          reason = "insufficient price history";
          return DIR_NONE;
@@ -152,7 +153,32 @@ public:
       bool bearishStructure = recentHigh < previousHigh && recentLow < previousLow;
       double roomToResistancePoints = MathMax(0.0, (recentHigh - close1) / _Point);
       double roomToSupportPoints = MathMax(0.0, (close1 - recentLow) / _Point);
-      bool inRange = structureRangePoints < MinStructureRangePoints;
+
+      double compressionHigh = rates[1].high;
+      double compressionLow = rates[1].low;
+      double priorCompressionHigh = rates[CompressionLookbackBars + 1].high;
+      double priorCompressionLow = rates[CompressionLookbackBars + 1].low;
+      for(int j = 1; j <= CompressionLookbackBars; j++)
+      {
+         compressionHigh = MathMax(compressionHigh, rates[j].high);
+         compressionLow = MathMin(compressionLow, rates[j].low);
+      }
+      for(int j = CompressionLookbackBars + 1; j <= CompressionLookbackBars * 2; j++)
+      {
+         priorCompressionHigh = MathMax(priorCompressionHigh, rates[j].high);
+         priorCompressionLow = MathMin(priorCompressionLow, rates[j].low);
+      }
+
+      double compressionRangePoints = (compressionHigh - compressionLow) / _Point;
+      double priorCompressionRangePoints = (priorCompressionHigh - priorCompressionLow) / _Point;
+      double breakoutBodyPoints = MathAbs(rates[0].close - rates[0].open) / _Point;
+      bool compressionValid = compressionRangePoints >= MinimumCompressionRangePoints &&
+                              priorCompressionRangePoints > 0.0 &&
+                              compressionRangePoints <= priorCompressionRangePoints * CompressionMaxRangeRatio;
+      bool bullishBreakout = close1 > compressionHigh + BreakoutBufferPoints * _Point;
+      bool bearishBreakout = close1 < compressionLow - BreakoutBufferPoints * _Point;
+      bool bullishBreakoutTrendValid = !UseTrendFilterForBreakouts || (bullishTrend && fastEntry > slowEntry);
+      bool bearishBreakoutTrendValid = !UseTrendFilterForBreakouts || (bearishTrend && fastEntry < slowEntry);
 
       if(UseMACDConfirmation)
       {
@@ -163,79 +189,70 @@ public:
          }
       }
 
-      if(inRange)
-      {
-         reason = StringFormat("regime=range structure_range_points=%.1f min_required=%d",
-                               structureRangePoints,
-                               MinStructureRangePoints);
-         return DIR_NONE;
-      }
-
-      bool buyEnabled = AllowBuy && AllowLongPullbacks;
+      bool buyEnabled = AllowBuy && AllowLongBreakouts;
       bool buyEntryAligned = fastEntry > slowEntry;
       bool buyRsiValid = rsi > RSIOversold && rsi < RSIOverbought;
       bool buyMacdValid = !UseMACDConfirmation || macdMain > macdSignal;
-      bool buyConfirmationValid = !RequireConfirmationCandle || bullishConfirmation;
-      bool buyRoomValid = roomToResistancePoints >= MinimumObstacleDistancePoints;
+      bool buyBodyValid = breakoutBodyPoints >= MinimumBreakoutBodyPoints;
 
-      if(buyEnabled && bullishTrend && buyEntryAligned && bullishPullbackTouched &&
-         buyRsiValid && buyMacdValid && buyConfirmationValid && bullishStructure && buyRoomValid)
+      if(buyEnabled && compressionValid && bullishBreakout && bullishBreakoutTrendValid &&
+         buyEntryAligned && buyRsiValid && buyMacdValid && buyBodyValid)
       {
-         reason = StringFormat("playbook=trend_pullback regime=bullish accepted pullback=ema50 confirmation=%s rsi=%.1f room_points=%.1f",
-                               RequireConfirmationCandle ? "candle" : "disabled",
-                               rsi,
-                               roomToResistancePoints);
+         reason = StringFormat("playbook=compression_breakout regime=bullish accepted compression_range=%.1f prior_range=%.1f body=%.1f rsi=%.1f",
+                               compressionRangePoints,
+                               priorCompressionRangePoints,
+                               breakoutBodyPoints,
+                               rsi);
          return DIR_BUY;
       }
 
-      bool sellEnabled = AllowSell && AllowShortPullbacks;
+      bool sellEnabled = AllowSell && AllowShortBreakouts;
       bool sellEntryAligned = fastEntry < slowEntry;
       bool sellRsiValid = rsi < RSIOverbought && rsi > RSIOversold;
       bool sellMacdValid = !UseMACDConfirmation || macdMain < macdSignal;
-      bool sellConfirmationValid = !RequireConfirmationCandle || bearishConfirmation;
-      bool sellRoomValid = roomToSupportPoints >= MinimumObstacleDistancePoints;
+      bool sellBodyValid = breakoutBodyPoints >= MinimumBreakoutBodyPoints;
 
-      if(sellEnabled && bearishTrend && sellEntryAligned && bearishPullbackTouched &&
-         sellRsiValid && sellMacdValid && sellConfirmationValid && bearishStructure && sellRoomValid)
+      if(sellEnabled && compressionValid && bearishBreakout && bearishBreakoutTrendValid &&
+         sellEntryAligned && sellRsiValid && sellMacdValid && sellBodyValid)
       {
-         reason = StringFormat("playbook=trend_pullback regime=bearish accepted pullback=ema50 confirmation=%s rsi=%.1f room_points=%.1f",
-                               RequireConfirmationCandle ? "candle" : "disabled",
-                               rsi,
-                               roomToSupportPoints);
+         reason = StringFormat("playbook=compression_breakout regime=bearish accepted compression_range=%.1f prior_range=%.1f body=%.1f rsi=%.1f",
+                               compressionRangePoints,
+                               priorCompressionRangePoints,
+                               breakoutBodyPoints,
+                               rsi);
          return DIR_SELL;
       }
 
       string buyBlockers = "";
       if(!buyEnabled) AddBlocker(buyBlockers, "disabled");
-      if(!bullishTrend) AddBlocker(buyBlockers, "regime");
+      if(!compressionValid) AddBlocker(buyBlockers, "compression");
+      if(!bullishBreakout) AddBlocker(buyBlockers, "breakout");
+      if(!bullishBreakoutTrendValid) AddBlocker(buyBlockers, "trend_filter");
       if(!buyEntryAligned) AddBlocker(buyBlockers, "entry_ema_alignment");
-      if(!bullishPullbackTouched) AddBlocker(buyBlockers, "pullback");
       if(!buyRsiValid) AddBlocker(buyBlockers, "rsi");
       if(!buyMacdValid) AddBlocker(buyBlockers, "macd");
-      if(!buyConfirmationValid) AddBlocker(buyBlockers, "confirmation");
-      if(!bullishStructure) AddBlocker(buyBlockers, "structure");
-      if(!buyRoomValid) AddBlocker(buyBlockers, "obstacle_room");
+      if(!buyBodyValid) AddBlocker(buyBlockers, "body");
 
       string sellBlockers = "";
       if(!sellEnabled) AddBlocker(sellBlockers, "disabled");
-      if(!bearishTrend) AddBlocker(sellBlockers, "regime");
+      if(!compressionValid) AddBlocker(sellBlockers, "compression");
+      if(!bearishBreakout) AddBlocker(sellBlockers, "breakout");
+      if(!bearishBreakoutTrendValid) AddBlocker(sellBlockers, "trend_filter");
       if(!sellEntryAligned) AddBlocker(sellBlockers, "entry_ema_alignment");
-      if(!bearishPullbackTouched) AddBlocker(sellBlockers, "pullback");
       if(!sellRsiValid) AddBlocker(sellBlockers, "rsi");
       if(!sellMacdValid) AddBlocker(sellBlockers, "macd");
-      if(!sellConfirmationValid) AddBlocker(sellBlockers, "confirmation");
-      if(!bearishStructure) AddBlocker(sellBlockers, "structure");
-      if(!sellRoomValid) AddBlocker(sellBlockers, "obstacle_room");
+      if(!sellBodyValid) AddBlocker(sellBlockers, "body");
 
-      reason = StringFormat("playbook=trend_pullback blocked buy=[%s] sell=[%s] rsi=%.1f trend_sep_points=%.1f fast_slope_points=%.1f slow_slope_points=%.1f room_up_points=%.1f room_down_points=%.1f",
+      reason = StringFormat("playbook=compression_breakout blocked buy=[%s] sell=[%s] compression_range=%.1f prior_range=%.1f body=%.1f rsi=%.1f trend_sep=%.1f fast_slope=%.1f slow_slope=%.1f",
                             buyBlockers,
                             sellBlockers,
+                            compressionRangePoints,
+                            priorCompressionRangePoints,
+                            breakoutBodyPoints,
                             rsi,
                             trendSeparationPoints,
                             fastSlopePoints,
-                            slowSlopePoints,
-                            roomToResistancePoints,
-                            roomToSupportPoints);
+                            slowSlopePoints);
       return DIR_NONE;
    }
 };

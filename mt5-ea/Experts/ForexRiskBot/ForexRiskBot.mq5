@@ -238,7 +238,9 @@ void OnTick()
    riskManager.RegisterTradeOpened();
    if(direction == DIR_BUY) buyCount++;
    if(direction == DIR_SELL) sellCount++;
-   string setupType = StringFind(reason, "trend_pullback") >= 0 ? "trend_pullback" : "unknown";
+   string setupType = "unknown";
+   if(StringFind(reason, "compression_breakout") >= 0) setupType = "compression_breakout";
+   else if(StringFind(reason, "trend_pullback") >= 0) setupType = "trend_pullback";
    MqlDateTime tradeTimeParts;
    TimeToStruct(TimeCurrent(), tradeTimeParts);
    logger.Info(StringFormat("trade plan symbol=%s direction=%s setup=%s lots=%.2f entry=%.5f sl=%.5f tp=%.5f rr=%.2f atr_points=%.1f hour=%d",
